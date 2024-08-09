@@ -13,6 +13,14 @@ from transforms3d.euler import euler2axangle
 from simpler_env.utils.action.action_ensemble import ActionEnsembler
 
 
+
+def cap(inst):
+    words = inst.split(' ')
+    ans = ""
+    for i in words:
+        ans+= i.capitalize()+" "
+    return ans
+
 class OctoInference:
     def __init__(
         self,
@@ -116,6 +124,7 @@ class OctoInference:
     def reset(self, task_description: str) -> None:
         self.task = self.model.create_tasks(texts=[task_description])
         self.task_description = task_description
+        print(cap(task_description))
         self.image_history.clear()
         if self.action_ensemble:
             self.action_ensembler.reset()
@@ -155,7 +164,7 @@ class OctoInference:
         self.rng, key = jax.random.split(self.rng)  # each shape [2,]
         # print("octo local rng", self.rng, key)
 
-        input_observation = {"image_primary": images, "pad_mask": pad_mask}
+        input_observation = {"image_primary": images, "timestep_pad_mask": pad_mask}
         norm_raw_actions = self.model.sample_actions(
             input_observation,
             self.task,

@@ -7,7 +7,7 @@ from simpler_env.evaluation.argparse import get_args
 from simpler_env.evaluation.maniskill2_evaluator import maniskill2_evaluator
 from simpler_env.policies.octo.octo_server_model import OctoServerInference
 from simpler_env.policies.rt1.rt1_model import RT1Inference
-
+from simpler_env.policies.openvla.openvla_model import OPENVLAInference
 try:
     from simpler_env.policies.octo.octo_model import OctoInference
 except ImportError as e:
@@ -53,6 +53,8 @@ if __name__ == "__main__":
                 init_rng=args.octo_init_rng,
                 action_scale=args.action_scale,
             )
+    elif "openvla" in args.policy_model:
+        model = OPENVLAInference(policy_setup=args.policy_setup)
     else:
         raise NotImplementedError()
 

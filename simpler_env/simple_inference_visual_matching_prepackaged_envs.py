@@ -18,10 +18,10 @@ import tensorflow as tf
 import simpler_env
 from simpler_env import ENVIRONMENTS
 from simpler_env.utils.env.observation_utils import get_image_from_maniskill2_obs_dict
-
+from simpler_env.policies.openvla.openvla_model import OPENVLAInference
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--policy", default="rt1", choices=["rt1", "octo-base", "octo-small"])
+parser.add_argument("--policy", default="rt1", choices=["rt1", "octo-base", "octo-small","openvla"])
 parser.add_argument(
     "--ckpt-path",
     type=str,
@@ -52,7 +52,7 @@ gpus = tf.config.list_physical_devices("GPU")
 if len(gpus) > 0:
     # prevent a single tf process from taking up all the GPU memory
     tf.config.set_logical_device_configuration(
-        gpus[0],
+        gpus[1],
         [tf.config.LogicalDeviceConfiguration(memory_limit=args.tf_memory_limit)],
     )
 
@@ -75,6 +75,8 @@ elif "octo" in args.policy:
     from simpler_env.policies.octo.octo_model import OctoInference
 
     model = OctoInference(model_type=args.ckpt_path, policy_setup=policy_setup, init_rng=0)
+elif "openvla" in args.policy:
+    model = OPENVLAInference(policy_setup=policy_setup)
 else:
     raise NotImplementedError()
 
@@ -121,6 +123,7 @@ for ep_id in range(args.n_trajs):
     episode_stats = info.get("episode_stats", {})
     success_arr.append(success)
     print(f"Episode {ep_id} success: {success}")
+    policy.save_feat(f"{logging_dir}/episode_{ep_id}_success_{success}")
     media.write_video(f"{logging_dir}/episode_{ep_id}_success_{success}.mp4", images, fps=5)
 
 print(
